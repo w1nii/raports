@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>w1ndex | рапорты</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a0c;
+            color: #eef0f5;
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a0c;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .preloader.hide {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .preloader-bar {
+            width: 220px;
+            height: 2px;
+            background: #2a2a2f;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .preloader-fill {
+            width: 0%;
+            height: 100%;
+            background: #c0c0cf;
+            transition: width 0.12s linear;
+        }
+        .preloader-text {
+            margin-top: 12px;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            font-weight: 400;
+            color: #9ca3af;
+        }
+
+        .bg-dots {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
+            background-size: 32px 32px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        @media (max-width: 680px) {
+            .container {
+                padding: 1rem 1rem 3rem;
+            }
+        }
+
+        .banner-top {
+            border-radius: 28px;
+            overflow: hidden;
+            margin-bottom: 0;
+            box-shadow: 0 10px 22px -12px rgba(0,0,0,0.7);
+            border: 1px solid #2a2a32;
+        }
+
+        .banner-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            display: block;
+            filter: brightness(0.85) contrast(1.05);
+        }
+
+        @media (max-width: 640px) {
+            .banner-img {
+                height: 110px;
+            }
+        }
+
+        .avatar-center {
+            display: flex;
+            justify-content: center;
+            margin-top: -52px;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .avatar-border {
+            background: #0a0a0c;
+            border-radius: 100px;
+            padding: 3px;
+            border: 1px solid #3e3e48;
+        }
+
+        .avatar-photo {
+            width: 96px;
+            height: 96px;
+            border-radius: 100%;
+            object-fit: cover;
+            display: block;
+            background: #14141e;
+        }
+
+        @media (max-width: 640px) {
+            .avatar-photo {
+                width: 76px;
+                height: 76px;
+            }
+            .avatar-center {
+                margin-top: -42px;
+            }
+        }
+
+        .reports-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 1.5rem;
+        }
+
+        .report-item {
+            background: #0f0f15;
+            border-radius: 1.8rem;
+            border: 1px solid #2b2b35;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            box-shadow: 0 8px 20px -8px rgba(0,0,0,0.5);
+        }
+
+        .report-item:hover {
+            border-color: #5f5f7a;
+            background: #13131b;
+        }
+
+        .report-head {
+            background: #0b0b10;
+            padding: 1rem 1.8rem;
+            border-bottom: 1px solid #262630;
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .report-nick {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(130deg, #ffffff, #c7c7e0);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+
+        .report-date-badge {
+            background: #1a1a24;
+            padding: 0.25rem 1rem;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: #c2c6e2;
+        }
+
+        .report-content {
+            padding: 1.6rem 1.8rem;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+            padding: 0.5rem 0 0.5rem 0.8rem;
+            border-left: 2px solid #8a8ab0;
+            margin-bottom: 0.6rem;
+        }
+
+        .info-label {
+            font-weight: 700;
+            color: #a0a4c4;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: #f0f2ff;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin: 1rem 0 0.8rem 0;
+            color: #cbcfec;
+            border-left: 2px solid #8a8ab0;
+            padding-left: 0.8rem;
+        }
+
+        .punishments-sub {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .punish-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .punish-table th, .punish-table td {
+            text-align: left;
+            padding: 0.7rem 0.5rem;
+            border-bottom: 1px solid #262632;
+            font-size: 0.85rem;
+        }
+
+        .punish-table th {
+            color: #b2b6d6;
+            font-weight: 600;
+            background: #0a0a10;
+        }
+
+        .screens-section {
+            margin-top: 1rem;
+        }
+
+        .screens-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 0.8rem;
+            color: #cbcfec;
+            border-left: 2px solid #8a8ab0;
+            padding-left: 0.8rem;
+        }
+
+        .screens-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .screenshot-card {
+            background: #12121a;
+            border-radius: 0.8rem;
+            overflow: hidden;
+            border: 1px solid #2a2a34;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+
+        .screenshot-card:hover {
+            border-color: #8a8ab0;
+            transform: translateY(-2px);
+        }
+
+        .screenshot-img {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+            display: block;
+        }
+
+        .screenshot-label {
+            padding: 0.4rem;
+            font-size: 0.65rem;
+            text-align: center;
+            color: #b0b4d4;
+            background: #0c0c12;
+            border-top: 1px solid #2a2a34;
+        }
+
+        .fullscreen-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: 0.2s;
+            cursor: pointer;
+        }
+        .fullscreen-modal.active {
+            visibility: visible;
+            opacity: 1;
+        }
+        .fullscreen-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 1rem;
+            border: 1px solid #6a6a88;
+            object-fit: contain;
+        }
+
+        footer {
+            margin-top: 2.8rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: #6a6e88;
+            border-top: 1px solid #25252e;
+            padding-top: 1.5rem;
+        }
+
+        .info-note {
+            background: #0d0d12;
+            border-radius: 1.5rem;
+            padding: 0.7rem 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #b5bad9;
+        }
+
+        @media (max-width: 600px) {
+            .report-content {
+                padding: 1.2rem;
+            }
+            .report-head {
+                padding: 0.8rem 1.2rem;
+            }
+            .report-nick {
+                font-size: 1.3rem;
+            }
+            .info-item {
+                flex-wrap: wrap;
+            }
+            .screens-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="preloader" id="preloader">
+    <div class="preloader-bar"><div class="preloader-fill" id="preloaderFill"></div></div>
+    <div class="preloader-text">ЗАГРУЗКА РАПОРТОВ</div>
+</div>
+
+<div class="bg-dots"></div>
+
+<div class="container">
+    <div class="banner-top">
+        <img class="banner-img" id="bannerImage" src="https://i.ibb.co/Cs1n7tSP/134940-AA-9-B8-B-4498-B729-355010-F66264.gif" alt="CivWorld модерация" onerror="this.src='https://placehold.co/1200x300/15151c/ffffff?text=CivWorld+Moderation'">
+    </div>
+
+    <div class="avatar-center">
+        <div class="avatar-border">
+            <img class="avatar-photo" id="moderAvatar" src="https://i.ibb.co/8Dc6PTxN/782-E590-F-C058-4289-95-C2-6028-B3229-FEC.gif" alt="w1ndex avatar" onerror="this.src='https://ui-avatars.com/api/?background=2d2d3a&color=fff&name=W1NDEX'">
+        </div>
+    </div>
+
+    <div class="info-note">
+        🩶 Рапорты каждый день
+    </div>
+
+    <div id="dailyReports" class="reports-list"></div>
+
+    <footer>
+        CivWorld · w1ndex · рапорты
+    </footer>
+</div>
+
+<div id="fullscreenModal" class="fullscreen-modal">
+    <img id="fullscreenImage" src="" alt="fullscreen">
+</div>
+
+<script>
+    let reportsArray = [];
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    function openFullscreen(src) {
+        const modal = document.getElementById('fullscreenModal');
+        const img = document.getElementById('fullscreenImage');
+        img.src = src;
+        modal.classList.add('active');
+    }
+
+    function closeFullscreen() {
+        const modal = document.getElementById('fullscreenModal');
+        modal.classList.remove('active');
+        document.getElementById('fullscreenImage').src = '';
+    }
+
+    function renderReports() {
+        const container = document.getElementById('dailyReports');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (reportsArray.length === 0) {
+            container.innerHTML = '<div style="background:#0f0f15; border-radius:1.8rem; padding:2rem; text-align:center; border:1px solid #2a2a34;">Нет добавленных рапортов. Используйте window.addReport() для добавления.</div>';
+            return;
+        }
+
+        for (let rep of reportsArray) {
+            const reportDiv = document.createElement('div');
+            reportDiv.className = 'report-item';
+
+            let punishmentsHtml = '';
+            if (rep.punishments && rep.punishments.length > 0) {
+                punishmentsHtml = `
+                    <div class="punishments-sub">
+                        <table class="punish-table">
+                            <thead>
+                                <tr><th>Ник нарушителя</th><th>Наказание</th><th>Причина</th></tr>
+                            </thead>
+                            <tbody>
+                `;
+                for (let p of rep.punishments) {
+                    punishmentsHtml += `
+                        <tr>
+                            <td>${escapeHtml(p.nick)}</td>
+                            <td>${escapeHtml(p.punishment)}</td>
+                            <td>${escapeHtml(p.reason)}</td>
+                        </tr>
+                    `;
+                }
+                punishmentsHtml += `</tbody></table></div>`;
+            } else {
+                punishmentsHtml = `<div class="info-item"><span class="info-label">Нарушения:</span><span class="info-value">— Нет нарушений —</span></div>`;
+            }
+
+            let screensHtml = '';
+            if (rep.screens && rep.screens.length > 0) {
+                let gridHtml = '<div class="screens-grid">';
+                for (let i = 0; i < rep.screens.length; i++) {
+                    const scr = rep.screens[i];
+                    gridHtml += `
+                        <div class="screenshot-card" onclick="openFullscreen('${escapeHtml(scr.imageUrl)}')">
+                            <img class="screenshot-img" src="${escapeHtml(scr.imageUrl)}" alt="скрин ${i+1}" loading="lazy" onerror="this.src='https://placehold.co/400x225/2a2a3a/ffffff?text=Ошибка+загрузки'">
+                            <div class="screenshot-label">Скрин ${i+1}</div>
+                        </div>
+                    `;
+                }
+                gridHtml += '</div>';
+                screensHtml = `
+                    <div class="screens-section">
+                        <div class="screens-title">📸 Скрины проделанной работы (${rep.screens.length} шт.):</div>
+                        ${gridHtml}
+                    </div>
+                `;
+            } else {
+                screensHtml = `<div class="screens-section"><div class="screens-title" style="border-left: 2px solid #8a8ab0; padding-left: 0.8rem;">📸 Скрины:</div><div class="info-item"><span class="info-value">— Скриншоты будут добавлены позже —</span></div></div>`;
+            }
+
+            reportDiv.innerHTML = `
+                <div class="report-head">
+                    <div class="report-nick">${escapeHtml(rep.nick)}</div>
+                    <div class="report-date-badge">📅 ${escapeHtml(rep.date)}</div>
+                </div>
+                <div class="report-content">
+                    <div class="info-item">
+                        <span class="info-label">1) Ник:</span>
+                        <span class="info-value">${escapeHtml(rep.nick)}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">2) Кол-во наказаний:</span>
+                        <span class="info-value">${rep.totalPunishments}</span>
+                    </div>
+                    
+                    <div class="section-title">3) Все наказания подробно</div>
+                    ${punishmentsHtml}
+                    
+                    <div class="info-item">
+                        <span class="info-label">4) Время в игре:</span>
+                        <span class="info-value">${escapeHtml(rep.playtime)}</span>
+                    </div>
+                    
+                    ${screensHtml}
+                </div>
+            `;
+            container.appendChild(reportDiv);
+        }
+    }
+
+    window.addReport = function(reportObj) {
+        if (!reportObj.nick || !reportObj.date || reportObj.totalPunishments === undefined || !reportObj.playtime) {
+            console.error('Ошибка: нужны поля nick, date, totalPunishments, punishments (массив), playtime, screens');
+            return false;
+        }
+        if (!Array.isArray(reportObj.punishments)) reportObj.punishments = [];
+        if (!Array.isArray(reportObj.screens)) reportObj.screens = [];
+        const exists = reportsArray.some(r => r.date === reportObj.date && r.nick === reportObj.nick);
+        if (!exists) {
+            reportsArray.push({ ...reportObj });
+            renderReports();
+            return true;
+        }
+        return false;
+    };
+
+    const defaultReport = {
+        nick: "w1ndex",
+        date: "04.06.2026",
+        totalPunishments: 6,
+        punishments: [
+            { nick: "sixseven67998", punishment: "Мут", reason: "2.0.7" },
+            { nick: "sixseven67998", punishment: "Мут", reason: "3.0.4" },
+            { nick: "me1z00", punishment: "Мут", reason: "2.0.5" },
+            { nick: "me1z00", punishment: "Мут", reason: "3.0.4" },
+            { nick: "korrix", punishment: "Бан", reason: "6.0.1" },
+            { nick: "qaz0lmtgf10", punishment: "Мут", reason: "2.1.3" }
+        ],
+        playtime: "5 часов",
+        screens: [
+            { imageUrl: "https://i.ibb.co/jvkBsxns/IMG-4489.jpg" },
+            { imageUrl: "https://i.ibb.co/zVypXR9b/IMG-4490.jpg" },
+            { imageUrl: "https://i.ibb.co/PGXzTJL7/IMG-4491.jpg" },
+            { imageUrl: "https://i.ibb.co/wNMDJNrF/IMG-4492.jpg" },
+            { imageUrl: "https://i.ibb.co/Kcs7y1BL/IMG-4493.jpg" },
+            { imageUrl: "https://i.ibb.co/S4ScF2wK/IMG-4494.jpg" },
+            { imageUrl: "https://i.ibb.co/0pw3jtk2/IMG-4495.jpg" }
+        ]
+    };
+
+    reportsArray.push(defaultReport);
+    renderReports();
+
+    const preloader = document.getElementById('preloader');
+    const preloaderFill = document.getElementById('preloaderFill');
+    if (preloader && preloaderFill) {
+        let width = 0;
+        const interval = setInterval(() => {
+            width += Math.floor(Math.random() * 7) + 5;
+            if (width >= 100) width = 100;
+            preloaderFill.style.width = width + '%';
+            if (width === 100) {
+                clearInterval(interval);
+                setTimeout(() => {
+                    preloader.classList.add('hide');
+                    setTimeout(() => {
+                        preloader.style.display = 'none';
+                    }, 500);
+                }, 200);
+            }
+        }, 35);
+    }
+
+    const avatarImg = document.getElementById('moderAvatar');
+    if (avatarImg) {
+        avatarImg.onerror = function() {
+            this.src = 'https://ui-avatars.com/api/?background=2d2d3a&color=fff&name=W1NDEX';
+        };
+    }
+
+    const bannerImg = document.getElementById('bannerImage');
+    if (bannerImg) {
+        bannerImg.onerror = function() {
+            this.src = 'https://placehold.co/1200x300/15151c/ffffff?text=CivWorld+Moderation';
+        };
+    }
+
+    document.getElementById('fullscreenModal')?.addEventListener('click', closeFullscreen);
+</script>
+</body>
+</html>
